@@ -1,0 +1,90 @@
+---
+title: "P8106 Midterm Project"
+author: "Paula Wu"
+output: pdf_document
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(viridis)
+library(GGally)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	message = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+
+Read in data (source: https://www.kaggle.com/datasets/kumarajarshi/life-expectancy-who)
+```{r}
+life_exp = read_csv("./data/Life Expectancy Data.csv") %>% 
+  janitor::clean_names()
+
+dev_label = life_exp %>% 
+  group_by(country) %>% 
+  filter(year == 2015) %>% 
+  select(status) %>% 
+  ungroup()
+
+life_exp_ave = 
+  life_exp %>% 
+  group_by(country) %>% 
+  summarize(life_expectancy = mean(life_expectancy, na.rm = TRUE),
+            adult_mortality = mean(adult_mortality, na.rm = TRUE),
+            infant_deaths = mean(infant_deaths),
+            alcohol = mean(alcohol, na.rm = TRUE),
+            percent_expenditure = mean(percentage_expenditure),
+            hepatitis_b = mean(hepatitis_b, na.rm = TRUE),
+            measles = mean(measles),
+            bmi = mean(bmi, na.rm = TRUE),
+            under_five_deaths = mean(under_five_deaths),
+            polio = mean(polio, na.rm = TRUE),
+            total_expenditure = mean(total_expenditure, na.rm = TRUE),
+            diphtheria = mean(diphtheria, na.rm = TRUE),
+            hiv_aids = mean(hiv_aids),
+            gdp = mean(gdp, na.rm = TRUE),
+            population = mean(population, na.rm = TRUE),
+            thinness_1_19_years = mean(thinness_1_19_years, na.rm = TRUE),
+            thinness_5_9_years = mean(thinness_5_9_years, na.rm = TRUE),
+            income_composition_of_resources = mean(income_composition_of_resources, na.rm = TRUE),
+            schooling = mean(schooling, na.rm = TRUE))
+life_exp_ave = merge(x = life_exp_ave, y = dev_label, by = "country")
+life_exp_ave = 
+  as.tibble(life_exp_ave) %>% 
+  mutate(status = fct_relevel(status, levels = c("Developing", "Developed"))) 
+
+```
+
+
+
+```{r}
+life_exp %>% 
+  drop_na() %>% 
+  filter(year %in% c(2013, 2014, 2015)) %>% 
+  select(-infant_deaths) %>%  # delete infant deaths due to high collinearity
+  ggcorr(label=TRUE, hjust = 0.9, layout.exp = 2, label_size = 3, label_round = 2) +
+  ggtitle("Correlation Heatmap of Predictors") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+
+```
+
+
